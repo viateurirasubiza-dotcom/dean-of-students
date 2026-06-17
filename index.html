@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>EAUR Leader Quotes</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-  body{
+<meta charset="UTF-8">
+<title>EAUR Leader Quotes</title>
+
+<style>
+body{
   font-family: Arial, sans-serif;
   margin: 0;
-  background: #f4f6f9;
+  background: #eef2f7;
   text-align: center;
 }
 
-/* Title */
 h1{
   background: #1e3a8a;
   color: white;
@@ -20,16 +19,41 @@ h1{
   margin: 0;
 }
 
-/* Posts container */
+/* ADMIN BOX */
+.admin{
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+input{
+  width: 95%;
+  padding: 10px;
+  margin: 8px 0;
+}
+
+button{
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* POSTS */
 #posts{
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
   align-items: center;
+  gap: 15px;
 }
 
-/* Each post card */
 .post{
   background: white;
   width: 90%;
@@ -37,83 +61,97 @@ h1{
   padding: 15px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: 0.3s;
 }
 
-.post:hover{
-  transform: scale(1.02);
-}
-
-/* Quote text */
-.post h3{
-  color: #1e3a8a;
-  font-size: 18px;
-}
-
-/* Image */
 .post img{
   width: 100%;
   border-radius: 10px;
-  margin-top: 10px;
 }
-
-/* Small animation */
-.post{
-  animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn{
-  from{opacity:0; transform: translateY(10px);}
-  to{opacity:1; transform: translateY(0);}
-}
+</style>
+</head>
 
 <body>
 
-  <h1>Leadership Quotes</h1>
+<h1>EAUR Leadership Quotes</h1>
 
-  <div id="posts"></div>
+<!-- ADMIN PANEL -->
+<div class="admin">
+  <h3>Admin Panel</h3>
 
-  <!-- Firebase + App Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, orderBy, query } 
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <input type="text" id="quote" placeholder="Enter quote">
+  <input type="text" id="image" placeholder="Image URL">
 
-  const firebaseConfig = {
-  apiKey: "AIzaSyDrBUO6ZcLO5pEJP3j4okbHcbAYRpO65f0",
-  authDomain: "leadre-quotes.firebaseapp.com",
-  projectId: "leadre-quotes",
-  storageBucket: "leadre-quotes.firebasestorage.app",
-  messagingSenderId: "210400217437",
-  appId: "1:210400217437:web:f2acf185fad92a769580b4"
+  <button onclick="postData()">Post Quote</button>
+</div>
+
+<!-- POSTS DISPLAY -->
+<div id="posts"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, orderBy, query } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_ID",
+  appId: "YOUR_APP_ID"
 };
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
 
-    const postsDiv = document.getElementById("posts");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    // Load posts
-    async function loadPosts() {
-      postsDiv.innerHTML = "";
+const postsDiv = document.getElementById("posts");
 
-      const q = query(collection(db, "posts"), orderBy("time", "desc"));
-      const querySnapshot = await getDocs(q);
+/* POST DATA */
+window.postData = async function(){
 
-      querySnapshot.forEach((doc) => {
-        let data = doc.data();
+  let quote = document.getElementById("quote").value;
+  let image = document.getElementById("image").value;
 
-        postsDiv.innerHTML += `
-          <div class="post">
-            <h3>${data.quote}</h3>
-            <img src="${data.image}" width="300">
-          </div>
-        `;
-      });
-    }
+  if(!quote || !image){
+    alert("Fill all fields");
+    return;
+  }
 
-    loadPosts();
-  </script>
+  await addDoc(collection(db, "posts"), {
+    quote: quote,
+    image: image,
+    time: Date.now()
+  });
+
+  document.getElementById("quote").value = "";
+  document.getElementById("image").value = "";
+
+  loadPosts();
+}
+
+/* LOAD POSTS */
+async function loadPosts(){
+  postsDiv.innerHTML = "";
+
+  const q = query(collection(db, "posts"), orderBy("time", "desc"));
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach((doc) => {
+    let data = doc.data();
+
+    postsDiv.innerHTML += `
+      <div class="post">
+        <h3>${data.quote}</h3>
+        <img src="${data.image}">
+      </div>
+    `;
+  });
+}
+
+loadPosts();
+
+</script>
 
 </body>
 </html>
