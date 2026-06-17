@@ -1,37 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>EAUR Leader Quotes</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>Leadership Quotes</h1>
+  <h1>Leadership Quotes</h1>
 
-<div id="posts"></div>
+  <div id="posts"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <!-- Firebase + App Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } 
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<script src="app.js"></script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyDrBUO6ZcLO5pEJP3j4okbHcbAYRpO65f0",
+  authDomain: "leadre-quotes.firebaseapp.com",
+  projectId: "leadre-quotes",
+  storageBucket: "leadre-quotes.firebasestorage.app",
+  messagingSenderId: "210400217437",
+  appId: "1:210400217437:web:f2acf185fad92a769580b4"
+};
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-</body>
-</html><!DOCTYPE html>
-<html>
-<head>
-  <title>EAUR Leader Quotes</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    const postsDiv = document.getElementById("posts");
 
-<h1>Leadership Quotes</h1>
+    // Load posts
+    async function loadPosts() {
+      postsDiv.innerHTML = "";
 
-<div id="posts"></div>
+      const q = query(collection(db, "posts"), orderBy("time", "desc"));
+      const querySnapshot = await getDocs(q);
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+      querySnapshot.forEach((doc) => {
+        let data = doc.data();
 
-<script src="app.js"></script>
+        postsDiv.innerHTML += `
+          <div class="post">
+            <h3>${data.quote}</h3>
+            <img src="${data.image}" width="300">
+          </div>
+        `;
+      });
+    }
+
+    loadPosts();
+  </script>
 
 </body>
 </html>
